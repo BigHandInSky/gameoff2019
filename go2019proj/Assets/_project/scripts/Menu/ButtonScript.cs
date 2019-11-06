@@ -13,6 +13,7 @@ namespace GameJam.Menu
         {
             PlayImmediately,
             OpenTutorial,
+            OpenOptions,
             OpenCredits,
             OpenLevelMaker,
             Quit,
@@ -50,6 +51,9 @@ namespace GameJam.Menu
                     break;
                 case MenuButtonCommand.OpenTutorial:
                     MenuHandler.instance.OpenTutorial();
+                    break;
+                case MenuButtonCommand.OpenOptions:
+                    MenuHandler.instance.OpenOptions();
                     break;
                 case MenuButtonCommand.OpenCredits:
                     MenuHandler.instance.OpenCredits();

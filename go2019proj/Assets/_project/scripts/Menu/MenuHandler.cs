@@ -56,6 +56,11 @@ namespace GameJam.Menu
             dialogs.Open(DialogContainer.DialogType.Tutorial);
         }
 
+        public void OpenOptions()
+        {
+            dialogs.Open(DialogContainer.DialogType.Options);
+        }
+
         public void OpenCredits()
         {
             // todo: credits dialog

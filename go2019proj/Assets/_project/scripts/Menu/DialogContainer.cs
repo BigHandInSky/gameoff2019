@@ -17,13 +17,15 @@ namespace GameJam.Menu
         {
             Tutorial,
             Credits,
-            LevelMaker
+            LevelMaker,
+            Options
         }
 
         [Header("Dialogs")]
         public GameObject tutorial;
         public GameObject credits;
         public GameObject levelMaker;
+        public GameObject options;
 
         private void Awake()
         {
@@ -36,6 +38,7 @@ namespace GameJam.Menu
             tutorial.SetActive(type == DialogType.Tutorial);
             credits.SetActive(type == DialogType.Credits);
             levelMaker.SetActive(type == DialogType.LevelMaker);
+            options.SetActive(type == DialogType.Options);
 
             _rectTransform.DOKill();
             _rectTransform.anchoredPosition = Vector2.right * hiddenOffset;
