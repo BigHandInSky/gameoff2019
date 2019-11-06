@@ -94,31 +94,7 @@ namespace GameJam
         private void DoTurn()
         {
             // cleanup for this turn
-            if (nextMovement)
-            {
-                nextMovement.RemoveState(Characters.playerMomentum);
-            }
-            if (nextMoveU)
-            {
-                nextMoveU.RemoveState(Characters.playerMoveU);
-            }
-            if (nextMoveD)
-            {
-                nextMoveD.RemoveState(Characters.playerMoveD);
-            }
-            if (nextMoveL)
-            {
-                nextMoveL.RemoveState(Characters.playerMoveL);
-            }
-            if (nextMoveR)
-            {
-                nextMoveR.RemoveState(Characters.playerMoveR);
-            }
-            nextMovement = null;
-            nextMoveU = null;
-            nextMoveD = null;
-            nextMoveL = null;
-            nextMoveR = null;
+            CleanupForTurn();
             
             // physics pre
             var momentumX = x + momentum.x;
@@ -146,44 +122,14 @@ namespace GameJam
             momentum.y = Mathf.MoveTowards(momentum.y, 0, decelerationPT);
 
             // highlighting next turn
-            momentumX = x + momentum.x;
-            momentumY = y + momentum.y;
-            
-            if (CanMoveTo(momentumX,momentumY))
-            {
-                nextMovement = Map.instance.Get(momentumX,momentumY);
-                nextMovement.AddState(Characters.playerMomentum);
-            }
             
             // highlighting next possible move
             // todo: this works mostly, but seems to highlight incorrectly for:
             // 1: when moving in the same direction again and again, you get p s . w, and p moves to s?
             // 2: doesn't seem to account for diagonals, maybe another issue
             
-            // up
-            if (CanMoveTo(momentumX, momentumY + accelerationPT))
-            {
-                nextMoveU = Map.instance.Get(momentumX, momentumY + accelerationPT);        
-                nextMoveU.AddState(Characters.playerMoveU);
-            }
-            // down
-            if (CanMoveTo(momentumX, momentumY - accelerationPT))
-            {
-                nextMoveD = Map.instance.Get(momentumX, momentumY - accelerationPT);        
-                nextMoveD.AddState(Characters.playerMoveD);
-            }
-            // left
-            if (CanMoveTo(momentumX - accelerationPT, momentumY))
-            {
-                nextMoveL = Map.instance.Get(momentumX - accelerationPT, momentumY);
-                nextMoveL.AddState(Characters.playerMoveL);
-            }
-            // right
-            if (CanMoveTo(momentumX + accelerationPT, momentumY))
-            {
-                nextMoveR = Map.instance.Get(momentumX + accelerationPT, momentumY);
-                nextMoveR.AddState(Characters.playerMoveR);
-            }
+            HighlightNextMovementPoint();
+            HighlightNextMovementInputs();
             
             // camera movement
             // todo: move to script that reacts to player event
@@ -192,6 +138,37 @@ namespace GameJam
             OnTurnTaken?.Invoke();
         }
 
+        private void CleanupForTurn()
+        {
+            if (nextMovement)
+            {
+                nextMovement.RemoveState(Characters.playerMomentum);
+            }
+            
+            if (nextMoveU)
+            {
+                nextMoveU.RemoveState(Characters.playerMoveU);
+            }
+            if (nextMoveD)
+            {
+                nextMoveD.RemoveState(Characters.playerMoveD);
+            }
+            if (nextMoveL)
+            {
+                nextMoveL.RemoveState(Characters.playerMoveL);
+            }
+            if (nextMoveR)
+            {
+                nextMoveR.RemoveState(Characters.playerMoveR);
+            }
+            
+            nextMovement = null;
+            nextMoveU = null;
+            nextMoveD = null;
+            nextMoveL = null;
+            nextMoveR = null;
+        }
+        
         private void DoWait()
         {
             DoTurn();
@@ -215,12 +192,18 @@ namespace GameJam
             var xTest = xPoint;
             var yTest = yPoint;
 
+            // edge of map
             if (xTest < 0 || xTest >= Map.instance.width)
                 return false;
             
             if (yTest < 0 || yTest >= Map.instance.height)
                 return false;
 
+            // is tile a wall/blocking type?
+            var tile = Map.instance.Get(xPoint, yPoint);
+            if (tile.type == TileType.Wall)
+                return false;
+            
             return true;
         }
         
@@ -249,6 +232,53 @@ namespace GameJam
             }
             
             current = to;
+        }
+        
+        #endregion
+
+        #region Highlighting
+
+        private void HighlightNextMovementPoint()
+        {
+            var momentumX = x + momentum.x;
+            var momentumY = y + momentum.y;
+            
+            if (CanMoveTo(momentumX,momentumY))
+            {
+                nextMovement = Map.instance.Get(momentumX,momentumY);
+                nextMovement.AddState(Characters.playerMomentum);
+            }
+        }
+
+        private void HighlightNextMovementInputs()
+        {
+            var momentumX = x + momentum.x;
+            var momentumY = y + momentum.y;
+            
+            // up
+            if (CanMoveTo(momentumX, momentumY + accelerationPT))
+            {
+                nextMoveU = Map.instance.Get(momentumX, momentumY + accelerationPT);        
+                nextMoveU.AddState(Characters.playerMoveU);
+            }
+            // down
+            if (CanMoveTo(momentumX, momentumY - accelerationPT))
+            {
+                nextMoveD = Map.instance.Get(momentumX, momentumY - accelerationPT);        
+                nextMoveD.AddState(Characters.playerMoveD);
+            }
+            // left
+            if (CanMoveTo(momentumX - accelerationPT, momentumY))
+            {
+                nextMoveL = Map.instance.Get(momentumX - accelerationPT, momentumY);
+                nextMoveL.AddState(Characters.playerMoveL);
+            }
+            // right
+            if (CanMoveTo(momentumX + accelerationPT, momentumY))
+            {
+                nextMoveR = Map.instance.Get(momentumX + accelerationPT, momentumY);
+                nextMoveR.AddState(Characters.playerMoveR);
+            }
         }
         
         #endregion
