@@ -64,6 +64,7 @@ namespace GameJam
             
             MoveTo(Map.instance.rows[x,y]);
             
+            HighlightNextMovementInputs();
             UpdateCamera();
         }
 

@@ -42,6 +42,7 @@ namespace GameJam
         public MapTile[,] rows { get; private set; }
 
         public delegate void MapEvent();
+        // todo: will/did regenerate
         public static event MapEvent OnGenerated;
         
         private void Awake()
