@@ -1,0 +1,18 @@
+game off todo
+
+actual work
+- momentum continue rather than cancel
+- tiles 
+	> stack texts and iterate through them
+	> text colours for result of action (red for death, gold for win, green for checkpoint, etc.)
+- tile types
+- load level
+	> verify level is square
+	> output explanation file for users
+	> log to error dialog for user facing
+- write default level utility script > (take input field as name in ui, open folder browser)
+
+not work
+- name
+- icon
+- 
