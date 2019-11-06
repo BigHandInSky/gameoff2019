@@ -30,6 +30,8 @@ actual work
 - checkpoints
 - game manager script
 
+- persist player stats to player prefs and show in menu?
+
 not work
 - name
 - icon

@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,6 +7,8 @@ namespace GameJam.Menu
 {
     public class ButtonScript : MonoBehaviour
     {
+        private RectTransform _rectTransform;
+
         public enum MenuButtonCommand
         {
             PlayImmediately,
@@ -15,16 +18,28 @@ namespace GameJam.Menu
             Quit,
         }
 
+        [Header("Type")]
         public MenuButtonCommand command;
         
         private void Awake()
         {
             GetComponent<Button>().onClick.AddListener(Click);
             
-            // todo: hide by default
+            _rectTransform = (RectTransform)transform;
+            
+            _rectTransform.localScale = new Vector3(0,1,1);
+            Open();
         }
-        
-        // todo: open animation
+
+        public void Open()
+        {
+            _rectTransform.DOScale(Vector3.one, 0.5f).SetDelay(0.5f + transform.GetSiblingIndex() * 0.15f).SetEase(Ease.InOutQuad);
+        }
+
+        public void Close()
+        {
+            _rectTransform.DOScale(new Vector3(0,1,1), 0.5f).SetDelay(transform.GetSiblingIndex() * 0.05f).SetEase(Ease.InOutQuad);
+        }
 
         private void Click()
         {
