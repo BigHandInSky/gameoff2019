@@ -7,7 +7,7 @@ namespace GameJam
 {
     public class MapTile : MonoBehaviour
     {
-        private TextMeshPro _tmp;
+        private TextMeshPro _tmp = null;
 
         [Header("Settings")]
         public float iterateInterval = 1;
@@ -32,12 +32,15 @@ namespace GameJam
             point = pos;
             type = value;
             
-            _tmp = gameObject.AddComponent<TextMeshPro>();
+            if(_tmp == null)
+                _tmp = gameObject.AddComponent<TextMeshPro>();
+            
             _tmp.rectTransform.sizeDelta = Vector2.one;
             _tmp.text = Characters.Get(type);
             _tmp.fontSize = 10;
             _tmp.alignment = TextAlignmentOptions.Midline;
             
+            StopAllCoroutines();
             StartCoroutine(DoStateIteration());
         }
 
