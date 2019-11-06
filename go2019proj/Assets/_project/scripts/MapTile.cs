@@ -20,6 +20,12 @@ namespace GameJam
         [Header("Runtime")]
         public bool playerIsOnTile;
         public List<string> states = new List<string>();
+        
+        // todo: global state iterator:
+        // 1 type/player
+        // 2 momentum
+        // 3 inputs
+        // 4 results???
 
         public void Setup(Int2 pos, TileType value)
         {
