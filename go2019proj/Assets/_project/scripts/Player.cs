@@ -26,18 +26,18 @@ namespace GameJam
         [Header("Position")]
         public int x;
         public int y;
-        public TextMeshPro current;
+        public MapTile current;
 
         [Header("'Physics'")] // todo: how to round values?
         public Vector2 momentum = Vector2.zero; // the current persistent speed of the player
         public float accelerationPT = 1; // how much to increase the speed per input
         public float decelerationPT = 1; // how much to reduce the speed per turn
         [Space(10)]
-        public TextMeshPro nextMovement;
-        public TextMeshPro nextMoveW;
-        public TextMeshPro nextMoveS;
-        public TextMeshPro nextMoveA;
-        public TextMeshPro nextMoveD;
+        public MapTile nextMovement;
+        public MapTile nextMoveU;
+        public MapTile nextMoveD;
+        public MapTile nextMoveL;
+        public MapTile nextMoveR;
         
         public delegate void PlayerEvent();
         public static event PlayerEvent OnTurnTaken;
@@ -93,36 +93,32 @@ namespace GameJam
 
         private void DoTurn()
         {
-            // todo: system for flashing between the characters per tile,
-            // i.e. make a Tile class
-            // basically like how dwarf fortress does it
-            
             // cleanup for this turn
-            if (nextMovement && nextMovement != current)
+            if (nextMovement)
             {
-                nextMovement.text = Characters.empty;
+                nextMovement.RemoveState(Characters.playerMomentum);
             }
-            if (nextMoveW && nextMoveW != current)
+            if (nextMoveU)
             {
-                nextMoveW.text = Characters.empty;
+                nextMoveU.RemoveState(Characters.playerMoveU);
             }
-            if (nextMoveS && nextMoveS != current)
+            if (nextMoveD)
             {
-                nextMoveS.text = Characters.empty;
+                nextMoveD.RemoveState(Characters.playerMoveD);
             }
-            if (nextMoveA && nextMoveA != current)
+            if (nextMoveL)
             {
-                nextMoveA.text = Characters.empty;
+                nextMoveL.RemoveState(Characters.playerMoveL);
             }
-            if (nextMoveD && nextMoveD != current)
+            if (nextMoveR)
             {
-                nextMoveD.text = Characters.empty;
+                nextMoveR.RemoveState(Characters.playerMoveR);
             }
             nextMovement = null;
-            nextMoveW = null;
-            nextMoveS = null;
-            nextMoveA = null;
+            nextMoveU = null;
             nextMoveD = null;
+            nextMoveL = null;
+            nextMoveR = null;
             
             // physics pre
             var momentumX = x + momentum.x;
@@ -143,11 +139,7 @@ namespace GameJam
             }
             
             // scene check
-            if (Map.instance.IsFinishTile(x, y))
-            {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-                return;
-            }
+            CheckCurrentTile();
             
             // physics post
             momentum.x = Mathf.MoveTowards(momentum.x, 0, decelerationPT);
@@ -160,8 +152,7 @@ namespace GameJam
             if (CanMoveTo(momentumX,momentumY))
             {
                 nextMovement = Map.instance.Get(momentumX,momentumY);
-                if (nextMovement != current)                
-                    nextMovement.text = Characters.playerMomentum;
+                nextMovement.AddState(Characters.playerMomentum);
             }
             
             // highlighting next possible move
@@ -172,30 +163,26 @@ namespace GameJam
             // up
             if (CanMoveTo(momentumX, momentumY + accelerationPT))
             {
-                nextMoveW = Map.instance.Get(momentumX, momentumY + accelerationPT);
-                if (nextMoveW != current && nextMoveW != nextMovement)                
-                    nextMoveW.text = Characters.playerMoveU;
+                nextMoveU = Map.instance.Get(momentumX, momentumY + accelerationPT);        
+                nextMoveU.AddState(Characters.playerMoveU);
             }
             // down
             if (CanMoveTo(momentumX, momentumY - accelerationPT))
             {
-                nextMoveS = Map.instance.Get(momentumX, momentumY - accelerationPT);
-                if (nextMoveS != current && nextMoveS != nextMovement)                
-                    nextMoveS.text = Characters.playerMoveD;
-            }
-            // right
-            if (CanMoveTo(momentumX + accelerationPT, momentumY))
-            {
-                nextMoveA = Map.instance.Get(momentumX + accelerationPT, momentumY);
-                if (nextMoveA != current && nextMoveA != nextMovement)                
-                    nextMoveA.text = Characters.playerMoveR;
+                nextMoveD = Map.instance.Get(momentumX, momentumY - accelerationPT);        
+                nextMoveD.AddState(Characters.playerMoveD);
             }
             // left
             if (CanMoveTo(momentumX - accelerationPT, momentumY))
             {
-                nextMoveD = Map.instance.Get(momentumX - accelerationPT, momentumY);
-                if (nextMoveD != current && nextMoveD != nextMovement)                
-                    nextMoveD.text = Characters.playerMoveL;
+                nextMoveL = Map.instance.Get(momentumX - accelerationPT, momentumY);
+                nextMoveL.AddState(Characters.playerMoveL);
+            }
+            // right
+            if (CanMoveTo(momentumX + accelerationPT, momentumY))
+            {
+                nextMoveR = Map.instance.Get(momentumX + accelerationPT, momentumY);
+                nextMoveR.AddState(Characters.playerMoveR);
             }
             
             // camera movement
@@ -250,20 +237,58 @@ namespace GameJam
             DoTurn();
         }
 
-        private void MoveTo(TextMeshPro to)
+        private void MoveTo(MapTile to)
         {
             if(to == current)
                 return;
             
-            to.text = Characters.player;
+            to.SetIsPlayerTile(true);
             if (current != null)
             {
-                current.text = Characters.empty;
+                current.SetIsPlayerTile(false);
             }
             
             current = to;
         }
         
         #endregion
+
+        private void CheckCurrentTile()
+        {
+            switch (current.type)
+            {
+                case TileType.Empty:
+                case TileType.Start:
+                    // do nothing
+                    break;
+                
+                case TileType.Checkpoint:
+                    // todo: persist, link to game manager on player death
+                    break;
+                case TileType.Checkpoint_picked:
+                    break;
+                
+                case TileType.Finish:
+                    // todo: win screen
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                    break;
+                
+                case TileType.Edge:
+                case TileType.Wall:
+                    // todo: this shouldn't happen
+                    break;
+                
+                case TileType.Hole:
+                    // todo: reload to checkpoint
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                    break;
+                case TileType.Trap:
+                    // todo: trigger trap code
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 }

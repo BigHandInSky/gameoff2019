@@ -39,7 +39,7 @@ namespace GameJam
         public bool regenerate;
         public string levelToLoad;
         
-        public TextMeshPro[,] rows { get; private set; }
+        public MapTile[,] rows { get; private set; }
 
         public delegate void MapEvent();
         public static event MapEvent OnGenerated;
@@ -79,7 +79,7 @@ namespace GameJam
             {
                 Destroy(transform.GetChild(t).gameObject);
             }
-            rows = new TextMeshPro[width,height];
+            rows = new MapTile[width,height];
         }
         
         private void LoadLevel()
@@ -132,42 +132,39 @@ namespace GameJam
             cloneTf.SetParent(transform);
             cloneTf.localPosition = new Vector3(x * spacing, y * spacing, 0);
 
-            // tmps, push into lists across
-            var tmp = clone.AddComponent<TextMeshPro>();
-            tmp.rectTransform.sizeDelta = Vector2.one;
-            tmp.text = isGameTile ? Characters.empty : Characters.edge;
-            tmp.fontSize = 10;
-            tmp.alignment = TextAlignmentOptions.Midline;
+            var tile = clone.AddComponent<MapTile>();
+            TileType tileType = isGameTile ? TileType.Empty : TileType.Edge;
 
             // todo: move to processor method for any x/y,
             // - so that it can be called from player and other methods rather than player doing a lot of setting
             // todo: move to process method on data struct (i.e. set tile type(x, y))
-            if (IsStartTile(x, y))
+            if (start.Equals(x, y))
             {
-                tmp.text = Characters.start;
+                tileType = TileType.Start;
             }
-            if (IsFinishTile(x, y))
+            if (finish.Equals(x, y))
             {
-                tmp.text = Characters.finish;
+                tileType = TileType.Finish;
             }
             for (int i = 0; i < wallTiles.Length; i++)
             {
                 if(wallTiles[i].Equals(x, y))
-                    tmp.text = Characters.wall;
+                    tileType = TileType.Wall;
             }
             for (int i = 0; i < holeTiles.Length; i++)
             {
                 if(holeTiles[i].Equals(x, y))
-                    tmp.text = Characters.hole;
+                    tileType = TileType.Hole;
             }
                     
+            tile.Setup(new Int2(x, y), tileType);
             if(isGameTile)
-                rows[x, y] = tmp;
+                rows[x, y] = tile;
         }
 
         // utility getters
         
-        public TextMeshPro Get(int x, int y)
+        public MapTile Get(int x, int y)
         {
             if (x < 0 || x >= width)
                 return null;
@@ -177,18 +174,9 @@ namespace GameJam
 
             return rows[x, y];
         }
-        public TextMeshPro Get(float x, float y)
+        public MapTile Get(float x, float y)
         {
             return rows[Mathf.RoundToInt(x), Mathf.RoundToInt(y)];
-        }
-
-        public bool IsStartTile(int x, int y)
-        {
-            return start.Equals(x, y);
-        }
-        public bool IsFinishTile(int x, int y)
-        {
-            return finish.Equals(x, y);
         }
     }
 }
