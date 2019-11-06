@@ -13,6 +13,7 @@ actual work
 	- when adding, start on new state, then iterate
 - how do traps work? (triggers only tiles next to it in border area)
 	- what traps are there?
+		- switch blockers on/off
 - hp?
 - menu
 - checkpoints
