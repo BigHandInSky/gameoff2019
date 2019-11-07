@@ -37,6 +37,7 @@ namespace GameJam
             
             _tmp.rectTransform.sizeDelta = Vector2.one;
             _tmp.text = Characters.Get(type);
+            _tmp.font = Map.instance.font;
             _tmp.fontSize = 10;
             _tmp.alignment = TextAlignmentOptions.Midline;
             

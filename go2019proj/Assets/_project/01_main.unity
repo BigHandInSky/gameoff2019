@@ -1337,10 +1337,10 @@ MonoBehaviour:
   accelerationPT: 0.8
   decelerationPT: 0.3
   nextMovement: {fileID: 0}
-  nextMoveW: {fileID: 0}
-  nextMoveS: {fileID: 0}
-  nextMoveA: {fileID: 0}
+  nextMoveU: {fileID: 0}
   nextMoveD: {fileID: 0}
+  nextMoveL: {fileID: 0}
+  nextMoveR: {fileID: 0}
 --- !u!1 &2145040068
 GameObject:
   m_ObjectHideFlags: 0
@@ -1373,6 +1373,7 @@ MonoBehaviour:
   width: 15
   height: 15
   spacing: 1
+  font: {fileID: 11400000, guid: ca0ee0d123df75649a66eb07e3dda308, type: 2}
   start:
     x: 1
     y: 1

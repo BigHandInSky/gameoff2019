@@ -24,6 +24,7 @@ namespace GameJam
         public int width;
         public int height;
         public float spacing = 1;
+        public TMP_FontAsset font;
 
         [Header("Data")] // todo: data struct
         public Int2 start = new Int2(0,0);
