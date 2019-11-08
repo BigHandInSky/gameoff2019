@@ -1,10 +1,25 @@
+/d // level name, creator name, description (100 character limit), creation date
+Level name goes here
+bighandinsky
+This is my cool level, it sits here to be cool and test stuff out, please enjoy it
+2019-11-08
+
+/m // map layout/tiles
 -------------------
 -------------------
 -------------------
----W------------F--
-   W---------------
----W---------------
----W---------------
---SW---------------
----W---------------
----W---------------
+----------------F--
+--x----------------
+------x11122-------
+------------111----
+--S-----------1----
+-------------------
+-------------------
+
+/x // mark which x triggers which trap number(s), and after how many turns, counting inclusive from top-left down, right
+5,3=1;t=0
+6,6=1,2;t=1
+
+/t // mark which trap number transforms into what kind of tile upon triggering, commas denote repeat trigger transformations
+1=_
+2=B,-;loops
