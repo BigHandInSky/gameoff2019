@@ -6,16 +6,16 @@ using UnityEngine.SceneManagement;
 
 namespace GameJam.Menu
 {
-    public class MenuHandler : MonoBehaviour
+    public class MenuUI : MonoBehaviour
     {
-        private static MenuHandler _instance;
-        public static MenuHandler instance
+        private static MenuUI _instance;
+        public static MenuUI instance
         {
             get
             {
                 if (!_instance)
                 {
-                    _instance = FindObjectOfType<MenuHandler>();
+                    _instance = FindObjectOfType<MenuUI>();
                 }
                 return _instance;
             }

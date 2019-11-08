@@ -47,22 +47,22 @@ namespace GameJam.Menu
             switch (command)
             {
                 case MenuButtonCommand.PlayImmediately:
-                    MenuHandler.instance.DoPlayImmediately();
+                    MenuUI.instance.DoPlayImmediately();
                     break;
                 case MenuButtonCommand.OpenTutorial:
-                    MenuHandler.instance.OpenTutorial();
+                    MenuUI.instance.OpenTutorial();
                     break;
                 case MenuButtonCommand.OpenOptions:
-                    MenuHandler.instance.OpenOptions();
+                    MenuUI.instance.OpenOptions();
                     break;
                 case MenuButtonCommand.OpenCredits:
-                    MenuHandler.instance.OpenCredits();
+                    MenuUI.instance.OpenCredits();
                     break;
                 case MenuButtonCommand.OpenLevelMaker:
-                    MenuHandler.instance.OpenLevelMaker();
+                    MenuUI.instance.OpenLevelMaker();
                     break;
                 case MenuButtonCommand.Quit:
-                    MenuHandler.instance.DoQuit();
+                    MenuUI.instance.DoQuit();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
