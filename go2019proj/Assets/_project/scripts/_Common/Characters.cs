@@ -27,6 +27,7 @@ namespace GameJam
         public const string wall = "W";
         public const string hole = "_";
         public const string trap = "x";
+        public const string trapReactor = " ";
 
         public static string Get(TileType type)
         {
@@ -55,6 +56,45 @@ namespace GameJam
                 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+        public static TileType Parse(char c)
+        {
+            switch (c)
+            {
+                case '-':
+                    return TileType.Empty;
+                
+                case 'S':
+                    return TileType.Start;
+                case 'C':
+                    return TileType.Checkpoint;
+                case 'F':
+                    return TileType.Finish;
+                
+                case 'W':
+                case 'w': // jump-able wall?
+                    return TileType.Wall;
+                case ' ':
+                    return TileType.Hole;
+                case 'X':
+                case 'x':
+                    return TileType.Trap;
+                    
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    return TileType.TrapReactor;
+                
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(c), c, null);
             }
         }
     }

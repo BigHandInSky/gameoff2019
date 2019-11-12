@@ -12,6 +12,7 @@ namespace GameJam
         Edge,
         Wall,
         Hole,
-        Trap
+        Trap,
+        TrapReactor
     }
 }

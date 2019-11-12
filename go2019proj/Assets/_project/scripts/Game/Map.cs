@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -26,7 +27,8 @@ namespace GameJam
         public float spacing = 1;
         public TMP_FontAsset font;
 
-        [Header("Data")] // todo: data struct
+        [Header( "Data" )]
+        public MapData currentMap;
         public Int2 start = new Int2(0,0);
         public Int2 finish = new Int2(5,5);
         // todo: checkpoints
@@ -91,11 +93,116 @@ namespace GameJam
                 // todo: clear any loaded data?
                 return;
             }
+            
+            currentMap = new MapData();
 
-            var url = System.IO.Path.Combine(Application.streamingAssetsPath, "Levels", levelToLoad + ".txt");
-            if (System.IO.File.Exists(url))
+            var url = Path.Combine(Application.streamingAssetsPath, "Levels", levelToLoad + ".txt");
+            if (File.Exists(url))
             {
-                Debug.Log(levelToLoad + " exists!");
+                try 
+                {
+                    Debug.Log(levelToLoad + " exists!");
+                    // read through the file until the last line, looking for keys (see notes in MapData)
+                    using ( StreamReader reader = File.OpenText( url ) )
+                    {
+                        Debug.Log("opened StreamReader successfully, beginning read...");
+
+                        MapParserState currentDataType = MapParserState.None;
+                        int lineIndexFromType = 0;
+                        
+                        string line;
+                        // Read and display lines from the file until the end of 
+                        // the file is reached.
+                        while ((line = reader.ReadLine()) != null) 
+                        {
+                            Console.WriteLine(line);
+
+                            // before anything else parse out which kind of text we should be expecting
+                            if ( line[0] == '/' )
+                            {
+                                switch ( line[1] )
+                                {
+                                    case 'd':
+                                        currentDataType = MapParserState.Data;
+                                        break;
+                                    case 'm':
+                                        currentDataType = MapParserState.MapLayout;
+                                        break;
+                                    case 'x':
+                                        currentDataType = MapParserState.TrapDescriptors;
+                                        break;
+                                    case 't':
+                                        currentDataType = MapParserState.TrapTriggerDescriptors;
+                                        break;
+                                    case 'b':
+                                        currentDataType = MapParserState.BestPlayer;
+                                        break;
+                                }
+
+                                lineIndexFromType = 0; // reset index to 0
+                                
+                                // and skip the rest of the reader code
+                                continue;
+                            }
+
+                            // now act based on current data type and line index
+                            switch ( currentDataType )
+                            {
+                                case MapParserState.None:
+                                    // do nothing
+                                    break;
+                                
+                                case MapParserState.Data:
+                                    if(lineIndexFromType != 0) // on the first read, just do all the needed lines, and skip onwards
+                                        continue;
+                                    currentMap.name = line;
+                                    currentMap.creator = reader.ReadLine();
+                                    currentMap.description = reader.ReadLine();
+                                    currentMap.date = reader.ReadLine();
+                                    break;
+                                
+                                case MapParserState.MapLayout:
+                                    // for the map, just keep reading across parsing lines until we hit the next boundary
+                                    // where we read from the top-left, across to the bottom right of the whole map
+                                    int x = 0;
+                                    foreach ( char c in line )
+                                    {
+                                        currentMap.tiles.Add( new TileData( c, x, lineIndexFromType ) );
+                                        x++;
+                                    }
+                                    
+                                    break;
+                                case MapParserState.TrapDescriptors:
+                                    // todo: read through, convert numbers to index counts, then setup trap links
+                                    break;
+                                case MapParserState.TrapTriggerDescriptors:
+                                    // todo: read through, find all trap numbers for a type, and setup
+                                    break;
+                                
+                                case MapParserState.BestPlayer:
+                                    if(lineIndexFromType != 0) // on the first read, just do all the needed lines, and skip onwards
+                                        continue;
+                                    currentMap.bestPlayerName = line;
+                                    currentMap.bestPlayerTurnsTaken = Int32.Parse( reader.ReadLine() );
+                                    break;
+                                
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
+                            
+                            lineIndexFromType++;
+                        }
+                        
+                        Debug.Log("read map successfully!");
+                    }
+                }
+                catch (Exception e) 
+                {
+                    // Let the user know what went wrong.
+                    Console.WriteLine("The file could not be read:");
+                    Console.WriteLine(e.Message);
+                }
+                
             }
             else
             {
