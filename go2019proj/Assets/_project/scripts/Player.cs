@@ -27,6 +27,8 @@ namespace GameJam
         public int x;
         public int y;
         public MapTile current;
+        
+        public Int2 currentPoint => current != null ? current.point : new Int2(x, y);
 
         [Header("'Physics'")] // todo: how to round values?
         public Vector2 momentum = Vector2.zero; // the current persistent speed of the player

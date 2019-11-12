@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
@@ -20,6 +22,8 @@ namespace GameJam
         [Header("Runtime")]
         public bool playerIsOnTile;
         public List<string> states = new List<string>();
+
+        private const float FADE_DISTANCE = 8F;
         
         // todo: global state iterator:
         // 1 type/player
@@ -27,6 +31,25 @@ namespace GameJam
         // 3 inputs
         // 4 results???
 
+        private void Awake()
+        {
+            Player.OnTurnTaken += PlayerOnTurnTaken;
+        }
+
+        private void OnDestroy()
+        {
+            Player.OnTurnTaken -= PlayerOnTurnTaken;
+        }
+
+        private void PlayerOnTurnTaken()
+        {
+            var distance = point.Distance( Player.instance.currentPoint );
+            float multiplier = 1 - Mathf.Clamp01( distance / FADE_DISTANCE );
+
+            transform.DOKill();
+            transform.DOScale( Vector3.one * multiplier, 0.5f ).SetEase( Ease.OutQuad );
+        }
+        
         public void Setup(Int2 pos, TileType value)
         {
             point = pos;

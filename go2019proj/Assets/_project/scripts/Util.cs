@@ -1,7 +1,20 @@
+using UnityEngine;
+
+
 namespace GameJam
 {
     public static class Util
     {
+
+
+#region Int2 Extensions
+
+        public static int Distance(this Int2 self, Int2 other )
+        {
+            return Mathf.Abs( other.x - self.x ) + Mathf.Abs( other.y - self.y );
+        }
+        
+#endregion
         
     }
     
@@ -11,6 +24,7 @@ namespace GameJam
         public int x;
         public int y;
 
+        public int magnitude => x + y;
         public int sqrMagnitude => x * x + y * y;
 
         public Int2(int x, int y)
