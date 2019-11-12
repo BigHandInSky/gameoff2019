@@ -56,8 +56,6 @@ namespace GameJam
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
-
-            return " ";
         }
     }
 }
