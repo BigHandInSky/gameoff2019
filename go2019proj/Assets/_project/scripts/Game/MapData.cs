@@ -28,9 +28,27 @@ namespace GameJam
         public string date;
 
         public List<TileData> tiles = new List<TileData>();
+        
+        public TileData start;
+        //public TileData finish;
+        //public TileData[] checkpoints;
 
         public string bestPlayerName;
         public int bestPlayerTurnsTaken;
+
+        public void DoPostImport(int height)
+        {
+            // having read the map, flip it on the y axis to match the user's expectations
+            int count = tiles.Count;
+            for ( int i = 0; i < count; i++ )
+            {
+                tiles[i].point.y = height - tiles[i].point.y;
+            }
+
+            start = tiles.Find( t => t.type == TileType.Start );
+            //finish = tiles.Find( t => t.type == TileType.Finish );
+            //checkpoints = tiles.FindAll( t => t.type == TileType.Checkpoint ).ToArray();
+        }
     }
     
     /// <summary>

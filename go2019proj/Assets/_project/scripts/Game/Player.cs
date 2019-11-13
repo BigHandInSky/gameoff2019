@@ -24,11 +24,10 @@ namespace GameJam
         private Transform _camera;
         
         [Header("Position")]
-        public int x;
-        public int y;
+        public Int2 point;
         public MapTile current;
         
-        public Int2 currentPoint => current != null ? current.point : new Int2(x, y);
+        public Int2 currentPoint => current != null ? current.point : point;
 
         [Header("'Physics'")] // todo: how to round values?
         public Vector2 momentum = Vector2.zero; // the current persistent speed of the player
@@ -61,10 +60,8 @@ namespace GameJam
         {
             // todo: reset method?
 
-            x = Map.instance.start.x;
-            y = Map.instance.start.y;
-            
-            MoveTo(Map.instance.rows[x,y]);
+            point = Map.instance.currentMap.start.point;
+            MoveTo(Map.instance.Get( point ));
             
             HighlightNextMovementInputs();
             UpdateCamera();
@@ -100,15 +97,15 @@ namespace GameJam
             CleanupForTurn();
             
             // physics pre
-            var momentumX = x + momentum.x;
-            var momentumY = y + momentum.y;
+            var momentumX = point.x + momentum.x;
+            var momentumY = point.y + momentum.y;
             
             // action
             if (CanMoveTo(momentumX,momentumY))
             {
-                x = Mathf.RoundToInt(momentumX);
-                y = Mathf.RoundToInt(momentumY);
-                MoveTo(Map.instance.Get(x,y));
+                point.x = Mathf.RoundToInt(momentumX);
+                point.y = Mathf.RoundToInt(momentumY);
+                MoveTo(Map.instance.Get(point));
             }
             else
             {
@@ -192,14 +189,8 @@ namespace GameJam
 
         private bool CanMoveTo(int xPoint, int yPoint)
         {
-            var xTest = xPoint;
-            var yTest = yPoint;
-
             // edge of map
-            if (xTest < 0 || xTest >= Map.instance.width)
-                return false;
-            
-            if (yTest < 0 || yTest >= Map.instance.height)
+            if ( Map.instance.Get( xPoint, yPoint ) == null )
                 return false;
 
             // is tile a wall/blocking type?
@@ -243,8 +234,8 @@ namespace GameJam
 
         private void HighlightNextMovementPoint()
         {
-            var momentumX = x + momentum.x;
-            var momentumY = y + momentum.y;
+            var momentumX = point.x + momentum.x;
+            var momentumY = point.y + momentum.y;
             
             if (CanMoveTo(momentumX,momentumY))
             {
@@ -255,8 +246,8 @@ namespace GameJam
 
         private void HighlightNextMovementInputs()
         {
-            var momentumX = x + momentum.x;
-            var momentumY = y + momentum.y;
+            var momentumX = point.x + momentum.x;
+            var momentumY = point.y + momentum.y;
             
             // up
             if (CanMoveTo(momentumX, momentumY + accelerationPT))
