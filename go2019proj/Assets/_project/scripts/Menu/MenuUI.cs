@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.IO;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -25,6 +26,11 @@ namespace GameJam.Menu
         public RectTransform subtitleRT;
         public DialogContainer dialogs;
 
+        [Space( 10 )] // todo: move to level loader child class
+        public Transform scrollerContent;
+        public LevelButtonScript prefab;
+        public Transform scrollerScrollbar;
+
         // todo: menu animator
         // todo: expose animation values that buttons read from, to simplify modifying delays and anims and such
         
@@ -37,6 +43,29 @@ namespace GameJam.Menu
             var subtitleRTPoint = subtitleRT.anchoredPosition;
             subtitleRT.anchoredPosition += Vector2.up * 150;
             subtitleRT.DOAnchorPos(subtitleRTPoint, 0.3f).SetEase(Ease.OutQuad).SetDelay(0.3f);
+            
+            // todo: move to spawner script
+            for (int t = 0; t < scrollerContent.childCount; t++)
+            {
+                Destroy(scrollerContent.GetChild(t).gameObject);
+            }
+            
+            Debug.Assert( Application.streamingAssetsPath != null);
+            var url = Path.Combine(Application.streamingAssetsPath, "Levels");
+            var files = Directory.GetFiles( url );
+            int index = 0;
+            foreach ( string s in files )
+            {
+                if ( s.Contains( ".meta" ) )
+                    continue;
+                
+                var clone = Instantiate( prefab, scrollerContent );
+                clone.Setup( index, s );
+                index++;
+            }
+
+            scrollerScrollbar.localScale = new Vector3( 1, 0, 1 );
+            scrollerScrollbar.DOScale( Vector3.one, 0.25f ).SetEase( Ease.OutQuad ).SetDelay( 0.8f );
         }
 
         public void DoPlayImmediately()

@@ -89,6 +89,7 @@ namespace GameJam
             
             currentMap = new MapData();
 
+            Debug.Assert( Application.streamingAssetsPath != null);
             var url = Path.Combine(Application.streamingAssetsPath, "Levels", levelToLoad + ".txt");
             if (File.Exists(url))
             {
