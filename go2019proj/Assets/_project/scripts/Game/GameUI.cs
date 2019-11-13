@@ -58,6 +58,18 @@ namespace GameJam
             slidersRT.DOAnchorPos(slidersRTPoint, 0.3f).SetEase(Ease.OutQuad).SetDelay(0.5f);
         }
 
+        private void Update()
+        {
+            if ( Input.GetKeyDown( KeyCode.R ) || Input.GetKeyDown( KeyCode.Return ) )
+            {
+                Retry();
+            }
+            if ( Input.GetKeyDown( KeyCode.Escape ) )
+            {
+                Escape();
+            }
+        }
+
         private void OnDestroy()
         {
             Player.OnTurnTaken -= PlayerOnTurnTaken;
@@ -73,7 +85,7 @@ namespace GameJam
 
         public void Retry()
         {
-            
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
         
         public void Escape()

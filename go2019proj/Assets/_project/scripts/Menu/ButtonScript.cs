@@ -34,7 +34,14 @@ namespace GameJam.Menu
 
         public void Open()
         {
-            _rectTransform.DOScale(Vector3.one, 0.5f).SetDelay(0.5f + transform.GetSiblingIndex() * 0.15f).SetEase(Ease.InOutQuad);
+            _rectTransform.DOScale(Vector3.one, 0.5f).SetDelay(0.5f + transform.GetSiblingIndex() * 0.15f).SetEase(Ease.InOutQuad).OnComplete(
+                () =>
+                {
+                    if ( command == MenuButtonCommand.PlayImmediately )
+                    {
+                        GetComponent<Button>().Select();
+                    }
+                } );
         }
 
         public void Close()
