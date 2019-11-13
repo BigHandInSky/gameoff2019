@@ -34,6 +34,7 @@ namespace GameJam
         public string levelToLoad;
         
         public Dictionary<Int2, MapTile> mapLookup { get; private set; }
+        public Dictionary<Int2, MapTile> edgeLookup { get; private set; }
 
         public delegate void MapEvent();
         // todo: will/did regenerate
@@ -75,6 +76,7 @@ namespace GameJam
                 Destroy(transform.GetChild(t).gameObject);
             }
             mapLookup = new Dictionary<Int2, MapTile>();
+            edgeLookup = new Dictionary<Int2, MapTile>();
         }
         
         private void LoadLevel()
@@ -214,7 +216,59 @@ namespace GameJam
                 MakeTile( currentMap.tiles[i] );
             }
                 
-            // now we need to get some ~~math~~ going to figure out the edges
+            // now walk around the edge of the map adding tiles
+            // todo: there _has_ to be a better way than doing this
+            for ( int i = 0; i < tileCount; i++ )
+            {
+                var p = currentMap.tiles[i].point;
+                var tester = p + new Int2( 1, 0 ); // r
+                if ( !mapLookup.ContainsKey( tester ) )
+                {
+                    MakeEdgeTile( tester );
+                }
+                
+                tester.y += 1; // ru
+                if ( !mapLookup.ContainsKey( tester ) )
+                {
+                    MakeEdgeTile( tester );
+                }
+                
+                tester.x -= 1; // u
+                if ( !mapLookup.ContainsKey( tester ) )
+                {
+                    MakeEdgeTile( tester );
+                }
+                
+                tester.x -= 1; // lu
+                if ( !mapLookup.ContainsKey( tester ) )
+                {
+                    MakeEdgeTile( tester );
+                }
+                
+                tester.y -= 1; // l
+                if ( !mapLookup.ContainsKey( tester ) )
+                {
+                    MakeEdgeTile( tester );
+                }
+                
+                tester.y -= 1; // ld
+                if ( !mapLookup.ContainsKey( tester ) )
+                {
+                    MakeEdgeTile( tester );
+                }
+                
+                tester.x += 1; // d
+                if ( !mapLookup.ContainsKey( tester ) )
+                {
+                    MakeEdgeTile( tester );
+                }
+                
+                tester.x += 1; // rd
+                if ( !mapLookup.ContainsKey( tester ) )
+                {
+                    MakeEdgeTile( tester );
+                }
+            }
         }
         
         private void MakeTile(TileData tile)
@@ -229,6 +283,22 @@ namespace GameJam
             tileComponent.Setup(tile.point, tile.type);
             
             mapLookup.Add( tile.point, tileComponent );
+        }
+        private void MakeEdgeTile(Int2 point)
+        {
+            if(edgeLookup.ContainsKey( point ))
+                return;
+            
+            var clone = new GameObject($"Edge");
+            var cloneTf = clone.transform;
+                    
+            cloneTf.SetParent(transform);
+            cloneTf.localPosition = new Vector3(point.x * spacing, point.y * spacing, 0);
+
+            var tileComponent = clone.AddComponent<MapTile>();
+            tileComponent.Setup(point, TileType.Edge);
+            
+            edgeLookup.Add( point, tileComponent );
         }
         
         // utility getters

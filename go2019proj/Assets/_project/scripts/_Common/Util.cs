@@ -46,5 +46,8 @@ namespace GameJam
         {
             return $"{x},{y}";
         }
+        
+        public static Int2 operator +(Int2 a, Int2 b) => new Int2(a.x + b.x, a.y + b.y);
+        public static Int2 operator -(Int2 a, Int2 b) => new Int2(a.x - b.x, a.y - b.y);
     }
 }
