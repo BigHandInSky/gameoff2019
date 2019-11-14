@@ -27,7 +27,7 @@ namespace GameJam
         public const string wall = "W";
         public const string hole = "_";
         public const string trap = "x";
-        public const string trapReactor = " ";
+        public const string trapReactor = ",";
 
         public static string Get(TileType type)
         {
@@ -53,6 +53,8 @@ namespace GameJam
                     return hole;
                 case TileType.Trap:
                     return trap;
+                case TileType.TrapReactor:
+                    return trapReactor;
                 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);

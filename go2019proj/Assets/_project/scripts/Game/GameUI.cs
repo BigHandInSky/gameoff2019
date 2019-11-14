@@ -25,6 +25,8 @@ namespace GameJam
 
         private void Awake()
         {
+            Map.OnFileRead += MapOnFileRead;
+            
             xSlider.minValue = -range;
             xSlider.maxValue = range;
             
@@ -33,29 +35,38 @@ namespace GameJam
             
             Player.OnTurnTaken += PlayerOnTurnTaken;
             PlayerOnTurnTaken();
-            
-            var titleRTPoint = headerRT.anchoredPosition;
-            var titleHidePoint = headerRT.anchoredPosition + Vector2.up * 59;
 
-            headerRT.anchoredPosition = titleHidePoint;
-            headerRT.DOAnchorPos(titleRTPoint, 0.3f).SetEase(Ease.OutQuad).SetDelay(0.2f).OnComplete( () =>
-                {
-                    headerRT.DOAnchorPos( titleHidePoint, 0.3f ).SetEase( Ease.OutQuad ).SetDelay( 1f );
-                } );
-
+            headerRT.anchoredPosition =  headerRT.anchoredPosition + Vector2.up * 59;
             foreach ( var rectTransform in leftSliders )
             {
-                var rtPoint = rectTransform.anchoredPosition;
                 rectTransform.anchoredPosition += Vector2.left * 135;
+            }
+            slidersRT.anchoredPosition += Vector2.down * 150;
+        }
+
+        private void MapOnFileRead()
+        {
+            title.text = $"[{Map.instance.currentMap.fileIndex.ToString("000")}]\"{Map.instance.currentMap.name}\"";
+            attempts.text = Map.instance.currentMap.creator; // par time?
+            
+            // reveal ui
+            var titleRTPoint = headerRT.anchoredPosition + Vector2.down * 59;
+            var titleHidePoint = headerRT.anchoredPosition;
+
+            headerRT.DOAnchorPos(titleRTPoint, 0.3f).SetEase(Ease.OutQuad).SetDelay(0.2f).OnComplete( () =>
+            {
+                headerRT.DOAnchorPos( titleHidePoint, 0.3f ).SetEase( Ease.OutQuad ).SetDelay( 1f );
+            } );
+            
+            foreach ( var rectTransform in leftSliders )
+            {
+                var rtPoint = rectTransform.anchoredPosition + Vector2.right * 135;
                 rectTransform.DOAnchorPos(rtPoint, 0.3f).SetEase(Ease.OutQuad).SetDelay(0.3f).OnComplete( () =>
                 {
                     rectTransform.DOAnchorPos( rtPoint + Vector2.up * 58, 0.3f ).SetEase( Ease.OutQuad ).SetDelay( 0.9f );
                 } );
             }
-            
-            var slidersRTPoint = slidersRT.anchoredPosition;
-            slidersRT.anchoredPosition += Vector2.down * 150;
-            slidersRT.DOAnchorPos(slidersRTPoint, 0.3f).SetEase(Ease.OutQuad).SetDelay(0.5f);
+            slidersRT.DOAnchorPos(slidersRT.anchoredPosition + Vector2.up * 150, 0.3f).SetEase(Ease.OutQuad).SetDelay(0.5f);
         }
 
         private void Update()

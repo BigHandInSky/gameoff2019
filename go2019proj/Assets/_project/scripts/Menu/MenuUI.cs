@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -44,24 +45,16 @@ namespace GameJam.Menu
             subtitleRT.anchoredPosition += Vector2.up * 150;
             subtitleRT.DOAnchorPos(subtitleRTPoint, 0.3f).SetEase(Ease.OutQuad).SetDelay(0.3f);
             
-            // todo: move to spawner script
+            // todo: move to scroller script
             for (int t = 0; t < scrollerContent.childCount; t++)
             {
                 Destroy(scrollerContent.GetChild(t).gameObject);
             }
             
-            Debug.Assert( Application.streamingAssetsPath != null);
-            var url = Path.Combine(Application.streamingAssetsPath, "Levels");
-            var files = Directory.GetFiles( url );
-            int index = 0;
-            foreach ( string s in files )
+            Persistence.RefreshLevels();
+            for ( var i = 0; i < Persistence.levelPaths.Length; i++ )
             {
-                if ( s.Contains( ".meta" ) )
-                    continue;
-                
-                var clone = Instantiate( prefab, scrollerContent );
-                clone.Setup( index, s );
-                index++;
+                Instantiate( prefab, scrollerContent ).Setup( i );
             }
 
             scrollerScrollbar.localScale = new Vector3( 1, 0, 1 );
@@ -70,13 +63,13 @@ namespace GameJam.Menu
 
         public void DoPlayImmediately()
         {
-            // todo: DoPlaySpecific with first level name
             // todo: animate out then load?
-            SceneManager.LoadScene(1);
+            DoPlayLevel( 0 );
         }
-        public void DoPlaySpecific(string filename)
+        public void DoPlayLevel(int fileIndex)
         {
-            
+            Persistence.selectedLevelIndex = fileIndex;
+            SceneManager.LoadScene( 1 );
         }
 
         public void OpenTutorial()

@@ -31,12 +31,13 @@ namespace GameJam
 
         [Header("Debug")]
         public bool regenerate;
-        public string levelToLoad;
+        public int debugLevelIndex = -1;
         
         public Dictionary<Int2, MapTile> mapLookup { get; private set; }
         public Dictionary<Int2, MapTile> edgeLookup { get; private set; }
 
         public delegate void MapEvent();
+        public static event MapEvent OnFileRead;
         // todo: will/did regenerate
         public static event MapEvent OnGenerated;
         
@@ -63,10 +64,11 @@ namespace GameJam
         private void Generate()
         {
             Cleanup();
-            LoadLevel();
-            MakeMap();
-            
-            OnGenerated?.Invoke();
+            LoadLevel( () =>
+            {
+                MakeMap();
+                OnGenerated?.Invoke();
+            });
         }
 
         private void Cleanup()
@@ -79,132 +81,135 @@ namespace GameJam
             edgeLookup = new Dictionary<Int2, MapTile>();
         }
         
-        private void LoadLevel()
+        private void LoadLevel(Action onFinish)
         {
-            if (string.IsNullOrEmpty(levelToLoad))
+            var url = Persistence.selectedLevelPath;
+            if ( Application.isEditor && debugLevelIndex >= 0 )
             {
-                // todo: clear any loaded data?
-                return;
+                Persistence.RefreshLevels();
+                url = Persistence.levelPaths[debugLevelIndex];
             }
+            
+            Debug.Assert( url != null);
             
             currentMap = new MapData();
 
-            Debug.Assert( Application.streamingAssetsPath != null);
-            var url = Path.Combine(Application.streamingAssetsPath, "Levels", levelToLoad + ".txt");
-            if (File.Exists(url))
+            if ( !File.Exists( url ) )
             {
-                try 
+                Debug.Log( "File doesn't exist boss: " + url );
+                return;
+            }
+            
+            try
+            {
+                // read through the file until the last line, looking for keys (see notes in MapData)
+                using ( StreamReader reader = File.OpenText( url ) )
                 {
-                    Debug.Log(levelToLoad + " exists!");
-                    // read through the file until the last line, looking for keys (see notes in MapData)
-                    using ( StreamReader reader = File.OpenText( url ) )
+                    Debug.Log( "opened StreamReader successfully for: " + url + ", beginning read..." );
+
+                    MapParserState currentDataType = MapParserState.None;
+                    int lineIndexFromType = 0;
+                    int mapHeight = 0;
+
+                    string line;
+                    // Read and display lines from the file until the end of 
+                    // the file is reached.
+                    while ( ( line = reader.ReadLine() ) != null )
                     {
-                        Debug.Log("opened StreamReader successfully, beginning read...");
+                        //Debug.Log( line );
 
-                        MapParserState currentDataType = MapParserState.None;
-                        int lineIndexFromType = 0;
-                        int mapHeight = 0;
-                        
-                        string line;
-                        // Read and display lines from the file until the end of 
-                        // the file is reached.
-                        while ((line = reader.ReadLine()) != null) 
+                        // before anything else parse out which kind of text we should be expecting
+                        if ( line[0] == '/' )
                         {
-                            Console.WriteLine(line);
-
-                            // before anything else parse out which kind of text we should be expecting
-                            if ( line[0] == '/' )
+                            switch ( line[1] )
                             {
-                                switch ( line[1] )
+                                case 'd':
+                                    currentDataType = MapParserState.Data;
+                                    break;
+                                case 'm':
+                                    currentDataType = MapParserState.MapLayout;
+                                    break;
+                                case 'x':
+                                    currentDataType = MapParserState.TrapDescriptors;
+                                    break;
+                                case 't':
+                                    currentDataType = MapParserState.TrapTriggerDescriptors;
+                                    break;
+                                case 'b':
+                                    currentDataType = MapParserState.BestPlayer;
+                                    break;
+                            }
+
+                            lineIndexFromType = 0; // reset index to 0
+
+                            // and skip the rest of the reader code
+                            continue;
+                        }
+
+                        // now act based on current data type and line index
+                        switch ( currentDataType )
+                        {
+                            case MapParserState.None:
+                                // do nothing
+                                break;
+
+                            case MapParserState.Data:
+                                if ( lineIndexFromType != 0
+                                ) // on the first read, just do all the needed lines, and skip onwards
+                                    continue;
+                                currentMap.name = line;
+                                currentMap.creator = reader.ReadLine();
+                                currentMap.description = reader.ReadLine();
+                                currentMap.date = reader.ReadLine();
+                                break;
+
+                            case MapParserState.MapLayout:
+                                // for the map, just keep reading across parsing lines until we hit the next boundary
+                                // where we read from the top-left, across to the bottom right of the whole map
+                                int x = 0;
+                                foreach ( char c in line )
                                 {
-                                    case 'd':
-                                        currentDataType = MapParserState.Data;
-                                        break;
-                                    case 'm':
-                                        currentDataType = MapParserState.MapLayout;
-                                        break;
-                                    case 'x':
-                                        currentDataType = MapParserState.TrapDescriptors;
-                                        break;
-                                    case 't':
-                                        currentDataType = MapParserState.TrapTriggerDescriptors;
-                                        break;
-                                    case 'b':
-                                        currentDataType = MapParserState.BestPlayer;
-                                        break;
+                                    currentMap.tiles.Add( new TileData( c, x, lineIndexFromType ) );
+                                    x++;
                                 }
 
-                                lineIndexFromType = 0; // reset index to 0
-                                
-                                // and skip the rest of the reader code
-                                continue;
-                            }
+                                mapHeight = lineIndexFromType;
+                                break;
+                            case MapParserState.TrapDescriptors:
+                                // todo: read through, convert numbers to index counts, then setup trap links
+                                break;
+                            case MapParserState.TrapTriggerDescriptors:
+                                // todo: read through, find all trap numbers for a type, and setup
+                                break;
 
-                            // now act based on current data type and line index
-                            switch ( currentDataType )
-                            {
-                                case MapParserState.None:
-                                    // do nothing
-                                    break;
-                                
-                                case MapParserState.Data:
-                                    if(lineIndexFromType != 0) // on the first read, just do all the needed lines, and skip onwards
-                                        continue;
-                                    currentMap.name = line;
-                                    currentMap.creator = reader.ReadLine();
-                                    currentMap.description = reader.ReadLine();
-                                    currentMap.date = reader.ReadLine();
-                                    break;
-                                
-                                case MapParserState.MapLayout:
-                                    // for the map, just keep reading across parsing lines until we hit the next boundary
-                                    // where we read from the top-left, across to the bottom right of the whole map
-                                    int x = 0;
-                                    foreach ( char c in line )
-                                    {
-                                        currentMap.tiles.Add( new TileData( c, x, lineIndexFromType ) );
-                                        x++;
-                                    }
-                                    
-                                    mapHeight = lineIndexFromType;
-                                    break;
-                                case MapParserState.TrapDescriptors:
-                                    // todo: read through, convert numbers to index counts, then setup trap links
-                                    break;
-                                case MapParserState.TrapTriggerDescriptors:
-                                    // todo: read through, find all trap numbers for a type, and setup
-                                    break;
-                                
-                                case MapParserState.BestPlayer:
-                                    if(lineIndexFromType != 0) // on the first read, just do all the needed lines, and skip onwards
-                                        continue;
-                                    currentMap.bestPlayerName = line;
-                                    currentMap.bestPlayerTurnsTaken = Int32.Parse( reader.ReadLine() );
-                                    break;
-                                
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
-                            
-                            lineIndexFromType++;
+                            case MapParserState.BestPlayer:
+                                if ( lineIndexFromType != 0
+                                ) // on the first read, just do all the needed lines, and skip onwards
+                                    continue;
+                                currentMap.bestPlayerName = line;
+                                currentMap.bestPlayerTurnsTaken = Int32.Parse( reader.ReadLine() );
+                                break;
+
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
-                        
-                        Debug.Log("read map successfully!");
 
-                        currentMap.DoPostImport(mapHeight);
+                        lineIndexFromType++;
                     }
+
+                    Debug.Log( "read map successfully!" );
+
+                    currentMap.DoPostImport( mapHeight );
+                    
+                    Debug.Log( "did post import, calling read event" );
+                    OnFileRead?.Invoke();
+                    onFinish?.Invoke();
                 }
-                catch (Exception e) 
-                {
-                    // Let the user know what went wrong.
-                    Console.WriteLine("The file could not be read:");
-                    Console.WriteLine(e.Message);
-                }
-                
             }
-            else
+            catch ( Exception e )
             {
-                Debug.Log("yeah nah");
+                Debug.Log( "The file could not be read:" );
+                Debug.LogException( e );
             }
         }
 
@@ -274,7 +279,7 @@ namespace GameJam
         
         private void MakeTile(TileData tile)
         {
-            var clone = new GameObject($"[{tile.point.ToString()}]");
+            var clone = new GameObject($"[{tile.point.ToString()}] {tile.type.ToString()}");
             var cloneTf = clone.transform;
                     
             cloneTf.SetParent(transform);

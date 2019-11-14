@@ -2788,8 +2788,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dda013ea4f0428e94f9fb4cb81cd4a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  x: 0
-  y: 0
+  point:
+    x: 0
+    y: 0
   current: {fileID: 0}
   momentum: {x: 0, y: 0}
   accelerationPT: 0.8
@@ -2828,28 +2829,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91286e09ad3ac40b3823e7afe98ce37f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 15
-  height: 15
   spacing: 1
   font: {fileID: 11400000, guid: ca0ee0d123df75649a66eb07e3dda308, type: 2}
-  start:
-    x: 1
-    y: 1
-  finish:
-    x: 5
-    y: 5
-  wallTiles:
-  - x: 3
-    y: 1
-  - x: 3
-    y: 2
-  holeTiles:
-  - x: 1
-    y: 4
-  - x: 2
-    y: 4
+  currentMap:
+    name: 
+    creator: 
+    description: 
+    date: 
+    tiles: []
+    start:
+      point:
+        x: 0
+        y: 0
+      type: 0
+      trapIndices: 
+      trapTurnDelay: 0
+      reactorIndex: 0
+      reactorTransformList: 
+      reactorBehaviour: 0
+    bestPlayerName: 
+    bestPlayerTurnsTaken: 0
   regenerate: 0
-  levelToLoad: level0
+  levelToLoad: 
 --- !u!4 &2145040070
 Transform:
   m_ObjectHideFlags: 0

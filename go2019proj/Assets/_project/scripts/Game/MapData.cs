@@ -2,6 +2,7 @@
 // 2019111222:04
 
 using System.Collections.Generic;
+using UnityEngine;
 
 
 namespace GameJam
@@ -22,6 +23,7 @@ namespace GameJam
     [System.Serializable]
     public class MapData
     {
+        public int fileIndex;
         public string name; // use for persisting to leaderboard file?
         public string creator;
         public string description;
@@ -46,6 +48,7 @@ namespace GameJam
             }
 
             start = tiles.Find( t => t.type == TileType.Start );
+            Debug.Log( $"did map find a start? {start != null}, is there one? {tiles.Exists( t => t.type == TileType.Start )}" );
             //finish = tiles.Find( t => t.type == TileType.Finish );
             //checkpoints = tiles.FindAll( t => t.type == TileType.Checkpoint ).ToArray();
         }

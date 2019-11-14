@@ -18,7 +18,7 @@ namespace GameJam.Menu
         public TextMeshProUGUI title;
         public TextMeshProUGUI content;
 
-        private string _file;
+        private int _fileIndex;
         
         private void Awake()
         {
@@ -31,13 +31,15 @@ namespace GameJam.Menu
 
         private void Click()
         {
-            // todo: set this level name as target
+            MenuUI.instance.DoPlayLevel( _fileIndex );
         }
 
-        public void Setup( int index, string url )
+        public void Setup( int index)
         {
-            Debug.Assert( !string.IsNullOrEmpty( url ));
-            _file = url;
+            Debug.Assert( Persistence.levelPaths != null && Persistence.levelPaths.Length > 0 );
+            Debug.Assert( Persistence.levelPaths[index] != null );
+            
+            _fileIndex = index;
             
             string levelName = "UNSET";
             string creatorName = "UNSET";
@@ -47,9 +49,8 @@ namespace GameJam.Menu
             // take file, parse data from /d
             try 
             {
-                Debug.Log(url + " exists!");
                 // read through the file until the last line, looking for keys (see notes in MapData)
-                using ( StreamReader reader = File.OpenText( url ) )
+                using ( StreamReader reader = File.OpenText( Persistence.levelPaths[index] ) )
                 {
                     string line;
                     // Read and display lines from the file until the end of 
